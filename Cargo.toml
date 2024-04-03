@@ -2,6 +2,12 @@
 name = "dndtrigger"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+keywords = ["macos"]
+categories = ["command-line-utilities"]
+description = "A simple cli/service for MacOS to execute scripts when Do Not Disturb is toggled on or off."
+repository = "github.com/collingray/dndtrigger"
+readme = "CRATES_README.md"
 
 [dependencies]
 clap = "4.5.4"
