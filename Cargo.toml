@@ -6,7 +6,7 @@ license = "MIT"
 keywords = ["macos"]
 categories = ["command-line-utilities"]
 description = "A simple cli/service for MacOS to execute scripts when Do Not Disturb is toggled on or off."
-repository = "github.com/collingray/dndtrigger"
+repository = "https://github.com/collingray/dndtrigger.git"
 readme = "CRATES_README.md"
 
 [dependencies]
