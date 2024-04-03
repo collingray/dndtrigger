@@ -10,20 +10,16 @@ fn main() {
         .version("0.1.0")
         .author("Collin Gray <me@collin.sh>")
         .about("Triggers specified actions when Do Not Disturb is toggled on or off.")
-        .subcommand(Command::new("start")
-            .about("Starts the service"))
-        .subcommand(Command::new("stop")
-            .about("Stops the service"))
-        .subcommand(Command::new("install")
-            .about("Installs and starts the service"))
-        .subcommand(Command::new("uninstall")
-            .about("Uninstalls the service"))
+        .subcommand(Command::new("enable")
+            .about("Installs and enables the service\t[requires root]"))
+        .subcommand(Command::new("disable")
+            .about("Disables and removes the service\t[requires root]"))
         .subcommand(Command::new("restart")
-            .about("Restarts the service"))
-        .subcommand(Command::new("run")
-            .about("Runs the listener in the foreground. (Not recommended, use 'install' to run as a service)"))
+            .about("Restarts the service\t\t\t[requires root]"))
+        .subcommand(Command::new("status")
+            .about("Prints the status of the service"))
         .subcommand(Command::new("config")
-            .about("Configures the actions to be run")
+            .about("Configures the actions to be run\t[requires root]")
             .arg(Arg::new("on_enable")
                 .help("The path to the binary/script to run when DND is enabled")
                 .required(false)
@@ -37,6 +33,8 @@ fn main() {
                 .required(false)
                 .long("user"))
             .arg_required_else_help(true))
+        .subcommand(Command::new("run")
+            .about("Runs the listener in the foreground. (Not recommended, use 'enable' to run as a service)"))
         .arg_required_else_help(true)
         .after_help(
             "The config plist file is located at /Library/Preferences/sh.collin.dndtrigger.\
@@ -49,21 +47,18 @@ fn main() {
         .get_matches();
 
     match matches.subcommand() {
-        Some(("start", _)) => {
-            services::stop_service();
-        }
-        Some(("stop", _)) => {
-            services::start_service();
-        }
-        Some(("install", _)) => {
+        Some(("enable", _)) => {
             services::install_service();
         }
-        Some(("uninstall", _)) => {
+        Some(("disable", _)) => {
             services::uninstall_service();
         }
         Some(("restart", _)) => {
             services::stop_service();
             services::start_service();
+        }
+        Some(("status", _)) => {
+            services::get_service_status();
         }
         Some(("config", config_matches)) => {
             config::write_config(
@@ -74,10 +69,15 @@ fn main() {
             println!(
                 "Config has been updated.\n\
                 If the Daemon is currently running, it will need to be restarted for changes \
-                to take effect.\n\
-                This can be done by running `dndtrigger restart`.\n\
-                If you changed the user, you will need to reinstall the service."
+                to take effect, which can be done by running `dndtrigger restart`."
             );
+
+            if config_matches.get_one::<String>("user").is_some() {
+                println!(
+                    "In order for the change to 'user' to take effect, the service must be \
+                    disabled and then re-enabled."
+                );
+            }
         }
         Some(("run", _)) => {
             let config = config::read_config();

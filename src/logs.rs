@@ -1,9 +1,9 @@
 use crate::config;
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::process::Command as Cmd;
+use tokio::process::Command;
 
 pub async fn process_log(config: config::DNDTriggerConfig) -> Result<(), Box<dyn std::error::Error>> {
-    let mut child = Cmd::new("log")
+    let mut child = Command::new("log")
         .args(&["stream", "--predicate", "subsystem == 'com.apple.donotdisturb'"])
         .stdout(std::process::Stdio::piped())
         .spawn()?;
@@ -15,11 +15,11 @@ pub async fn process_log(config: config::DNDTriggerConfig) -> Result<(), Box<dyn
         if let Some(dnd_state) = parse_line(&line).await {
             if dnd_state {
                 if let Some(on_enable) = &config.on_enable {
-                    Cmd::new(on_enable).spawn()?;
+                    Command::new(on_enable).spawn()?;
                 }
             } else {
                 if let Some(on_disable) = &config.on_disable {
-                    Cmd::new(on_disable).spawn()?;
+                    Command::new(on_disable).spawn()?;
                 }
             }
         }
